@@ -1,16 +1,29 @@
-import firebase from "firebase/app";
-import "firebase/auth";
+import Firebase, { db } from "../core/config"
+
 
 export const logoutUser = () => {
-  firebase.auth().signOut();
+  Firebase.auth().signOut();
 };
 
 export const signInUser = async ({ name, email, password }) => {
   try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
-    firebase.auth().currentUser.updateProfile({
-      displayName: name
-    });
+    let response = await Firebase.auth().createUserWithEmailAndPassword(email, password);
+    // firebase.auth().currentUser.updateProfile({
+    //   displayName: name
+    // });
+    if (response.user.uid) {
+      const user = {
+        uid: response.user.uid,
+        nombre: name,
+        email: email
+      }
+
+      db.collection('usuarios')
+        .doc(response.user.uid)
+        .set(user)
+
+      dispatch({ type: SIGNUP, payload: user })
+    }
 
     return {};
   } catch (error) {
@@ -41,7 +54,8 @@ export const signInUser = async ({ name, email, password }) => {
 
 export const loginUser = async ({ email, password }) => {
   try {
-    await firebase.auth().signInWithEmailAndPassword(email, password);
+    const response =  await Firebase.auth().signInWithEmailAndPassword(email, password);
+    dispatch(getUser(response.user.uid));
     return {};
   } catch (error) {
     switch (error.code) {
@@ -66,9 +80,24 @@ export const loginUser = async ({ email, password }) => {
   }
 };
 
+export const getUser = uid => {
+	return async (dispatch, getState) => {
+		try {
+			const user = await db
+				.collection('users')
+				.doc(uid)
+				.get()
+
+			dispatch({ type: LOGIN, payload: user.data() })
+		} catch (e) {
+			alert(e)
+		}
+	}
+}
+
 export const sendEmailWithPassword = async email => {
   try {
-    await firebase.auth().sendPasswordResetEmail(email);
+    await Firebase.auth().sendPasswordResetEmail(email);
     return {};
   } catch (error) {
     switch (error.code) {
