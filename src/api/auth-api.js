@@ -21,8 +21,6 @@ export const signInUser = async ({ name, email, password }) => {
       db.collection('usuarios')
         .doc(response.user.uid)
         .set(user)
-
-      dispatch({ type: SIGNUP, payload: user })
     }
 
     return {};
