@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useState, useContext } from "react";
 import { TouchableOpacity, StyleSheet, Text, View } from "react-native";
 import Background from "../components/Background";
 import Logo from "../components/Logo";
@@ -10,12 +10,16 @@ import { theme } from "../core/theme";
 import { emailValidator, passwordValidator } from "../core/utils";
 import { loginUser } from "../api/auth-api";
 import Toast from "../components/Toast";
+import { StoreContext } from "../context/store/storeContext";
+
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { state, actions } = useContext(StoreContext);
+
 
   const _onLoginPressed = async () => {
     if (loading) return;
@@ -33,7 +37,9 @@ const Login = ({ navigation }) => {
 
     const response = await loginUser({
       email: email.value,
-      password: password.value
+      password: password.value,
+      state: state,
+      actions: actions
     });
 
     if (response.error) {
@@ -57,7 +63,7 @@ const Login = ({ navigation }) => {
         error={!!email.error}
         errorText={email.error}
         autoCapitalize="none"
-        autoCompleteType="email"
+        autoComplete="email"
         textContentType="emailAddress"
         keyboardType="email-address"
       />

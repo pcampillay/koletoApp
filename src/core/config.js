@@ -18,9 +18,9 @@ let Firebase = firebase.initializeApp(firebaseConfig)
 
 export const db = firebase.firestore()
 
-// avoid deprecated warnings
-db.settings({
-	timestampsInSnapshots: true
-})
+// // avoid deprecated warnings
+// db.settings({
+// 	timestampsInSnapshots: true
+// })
 
 export default Firebase

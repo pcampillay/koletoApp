@@ -1,6 +1,5 @@
 import Firebase, { db } from "../core/config"
 
-
 export const logoutUser = () => {
   Firebase.auth().signOut();
 };
@@ -50,10 +49,10 @@ export const signInUser = async ({ name, email, password }) => {
   }
 };
 
-export const loginUser = async ({ email, password }) => {
+export const loginUser = async ({ email, password, state, actions }) => {
   try {
     const response =  await Firebase.auth().signInWithEmailAndPassword(email, password);
-    dispatch(getUser(response.user.uid));
+    getUser(response.user.uid,state, actions);
     return {};
   } catch (error) {
     switch (error.code) {
@@ -78,19 +77,29 @@ export const loginUser = async ({ email, password }) => {
   }
 };
 
-export const getUser = uid => {
-	return async (dispatch, getState) => {
+export const getUser = async (uid, state, actions ) => {
+  
+	// return async (dispatch, getState) => {
 		try {
-			const user = await db
-				.collection('users')
-				.doc(uid)
-				.get()
+			const user = await db.collection('usuarios').doc(uid)
+      user.get().then(function(doc) {
+        if (doc.exists) {
+            console.log("Document data:", doc.data());
+            actions.userActions.setUserValue(doc.data());
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+      }).catch(function(error) {
+          console.log("Error getting document:", error);
+      });
+    
 
-			dispatch({ type: LOGIN, payload: user.data() })
+			//dispatch({ type: LOGIN, payload: user.data() })
 		} catch (e) {
-			alert(e)
+			console(e)
 		}
-	}
+//	}
 }
 
 export const sendEmailWithPassword = async email => {
